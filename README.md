@@ -23,6 +23,21 @@ Variáveis de ambiente: `PORT` (padrão 3000), `HOST` (padrão 0.0.0.0), `DB_FIL
 
 Testes da API: `npm test`.
 
+## Publicação (deploy)
+
+O projeto inclui `Dockerfile`, `railway.json` e `render.yaml`.
+
+**Variáveis importantes**
+
+| Variável | Uso |
+|---|---|
+| `APP_PASSWORD` | **Defina sempre em produção.** Ativa a senha de acesso (o navegador pede usuário e senha; o usuário pode ser qualquer nome). |
+| `DB_FILE` | Caminho do banco. No Docker o padrão é `/data/barbearia.db` — monte um **volume/disco persistente em `/data`**, senão os dados se perdem a cada nova publicação. |
+
+**Railway:** New Project → Deploy from GitHub repo → selecione este repositório → em *Variables* adicione `APP_PASSWORD` → em *Settings* adicione um **Volume** montado em `/data` → *Networking* → *Generate Domain*.
+
+**Render:** New → Blueprint → selecione este repositório (usa o `render.yaml`, que já cria o disco em `/data`) → informe `APP_PASSWORD`.
+
 ## Funcionalidades
 
 | Tela | O que faz |

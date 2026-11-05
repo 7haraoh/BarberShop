@@ -110,3 +110,21 @@ test('validações', async () => {
   assert.equal(empty.margin, null);
   assert.equal(empty.ticket_cents, null);
 });
+
+test('senha de acesso (APP_PASSWORD)', async () => {
+  const app = createApp(openDatabase(':memory:'), { password: 'segredo' });
+  const srv = await new Promise((r) => {
+    const s = app.listen(0, () => r(s));
+  });
+  const url = `http://127.0.0.1:${srv.address().port}`;
+  try {
+    assert.equal((await fetch(url + '/api/health')).status, 200);
+    assert.equal((await fetch(url + '/api/services')).status, 401);
+    const bad = 'Basic ' + Buffer.from('x:errada').toString('base64');
+    assert.equal((await fetch(url + '/', { headers: { Authorization: bad } })).status, 401);
+    const ok = 'Basic ' + Buffer.from('dono:segredo').toString('base64');
+    assert.equal((await fetch(url + '/api/services', { headers: { Authorization: ok } })).status, 200);
+  } finally {
+    srv.close();
+  }
+});

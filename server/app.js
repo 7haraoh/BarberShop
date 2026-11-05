@@ -1,4 +1,5 @@
 import express from 'express';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tx, DEFAULT_SETTINGS } from './db.js';
@@ -58,9 +59,29 @@ const id = (v) => {
 };
 const plain = (row) => (row ? { ...row } : row);
 
-export function createApp(db) {
+/** Proteção por senha (HTTP Basic) quando APP_PASSWORD estiver definida. Usuário: qualquer um. */
+function passwordGate(password) {
+  const expected = crypto.createHash('sha256').update(password).digest();
+  return (req, res, next) => {
+    if (req.path === '/api/health') return next();
+    const m = /^Basic (.+)$/i.exec(req.headers.authorization || '');
+    if (m) {
+      const decoded = Buffer.from(m[1], 'base64').toString('utf8');
+      const pass = decoded.slice(decoded.indexOf(':') + 1);
+      const got = crypto.createHash('sha256').update(pass).digest();
+      if (crypto.timingSafeEqual(got, expected)) return next();
+    }
+    res.set('WWW-Authenticate', 'Basic realm="Barbearia Financeiro", charset="UTF-8"');
+    res.status(401).send('Acesso restrito. Informe a senha.');
+  };
+}
+
+export function createApp(db, { password = process.env.APP_PASSWORD } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', true);
+  app.get('/api/health', (req, res) => res.json({ ok: true }));
+  if (password) app.use(passwordGate(password));
   app.use(express.json({ limit: '20mb' }));
 
   const api = express.Router();
