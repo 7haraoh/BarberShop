@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: barbearia-financeiro
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: DB_FILE
+        value: /data/barbearia.db
+      - key: APP_PASSWORD
+        sync: false
+    disk:
+      name: dados
+      mountPath: /data
+      sizeGB: 1
