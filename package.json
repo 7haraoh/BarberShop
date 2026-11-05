@@ -1,0 +1,33 @@
+{
+  "name": "barbearia-financeiro",
+  "version": "1.0.0",
+  "description": "Gestão financeira para barbearia",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server.js",
+    "seed:demo": "node --disable-warning=ExperimentalWarning scripts/seed-demo.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/7haraoh/BarberShop.git"
+  },
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/7haraoh/BarberShop/issues"
+  },
+  "homepage": "https://github.com/7haraoh/BarberShop#readme",
+  "dependencies": {
+    "chart.js": "^4.6.1",
+    "exceljs": "^4.4.0",
+    "express": "^5.3.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "private": true
+}
