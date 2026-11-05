@@ -41,7 +41,7 @@ async function navigate() {
   current = route;
   $$('[data-path]').forEach((a) => a.classList.toggle('active', a.dataset.path === route.path));
   document.title = `${route.label} · Barbearia Financeiro`;
-  document.body.classList.remove('nav-open');
+  document.body.classList.remove('nav-open', 'has-cart', 'fab-open');
   destroyAll();
   main.scrollTop = 0;
   window.scrollTo(0, 0);
@@ -81,7 +81,7 @@ function init() {
   if (DEMO) {
     const b = document.createElement('div');
     b.className = 'demo-banner';
-    b.innerHTML = '<b>Versão de demonstração</b> · dados fictícios — fique à vontade para lançar, editar e excluir. <a href="#/config">Restaurar dados</a>';
+    b.innerHTML = '<b>Demonstração</b><span class="hide-mobile"> · dados fictícios — fique à vontade para lançar, editar e excluir.</span> <a href="#/config">Restaurar dados</a>';
     $('.topbar').after(b);
   }
   $('#today').textContent = `${cap(weekday(todayISO()))}, ${fmtDate(todayISO())}`;

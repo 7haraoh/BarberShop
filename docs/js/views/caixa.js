@@ -1,6 +1,6 @@
 import { api } from '../api.js';
 import { icon } from '../icons.js';
-import { periodPicker, toast, emptyState } from '../ui.js';
+import { periodPicker, toast, emptyState, dayList } from '../ui.js';
 import { exportPDF, exportXLSX } from '../export.js';
 import { money, fmtDate, todayISO, esc, weekday, cap } from '../utils.js';
 import { PAYMENT_METHODS, labelOf } from '../../shared/constants.js';
@@ -86,7 +86,19 @@ export async function load(el) {
         <header class="card-head"><h3>Movimentações</h3><span class="muted">${cf.movements.length} registro(s)</span></header>
         ${
           cf.movements.length
-            ? `<div class="table-wrap"><table class="table responsive compact">
+            ? `<div class="only-mobile">${dayList(
+                [...cf.movements].reverse().slice(0, 150).map((m) => ({
+                  id: `${m.kind}-${m.id}`,
+                  date: m.date,
+                  title: esc(m.description),
+                  sub: `${m.kind === 'entrada' ? 'Entrada' : 'Saída'} · ${esc(labelOf(PAYMENT_METHODS, m.payment_method))} · saldo ${money(m.balance_cents)}`,
+                  amount_cents: m.amount_cents,
+                  sign: m.kind === 'entrada' ? 1 : -1,
+                  cls: m.kind === 'entrada' ? 'txt-pos' : 'txt-neg',
+                })),
+                { signed: true }
+              )}</div>
+              <div class="table-wrap hide-mobile"><table class="table compact">
               <thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Pagamento</th><th class="num">Valor</th><th class="num">Saldo</th></tr></thead>
               <tbody>${[...cf.movements]
                 .reverse()

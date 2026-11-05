@@ -30,7 +30,7 @@ export async function render(el) {
     <div class="page-head">
       <div>
         <h1>Visão geral</h1>
-        <p class="muted">Resumo financeiro do mês selecionado</p>
+        <p class="muted hide-mobile">Resumo financeiro do mês selecionado</p>
       </div>
       <div class="month-nav">
         <button class="icon-btn" data-m="-1" aria-label="Mês anterior">${icon('left')}</button>
@@ -129,6 +129,8 @@ async function load(el) {
       <article class="card span-2">
         <header class="card-head"><h3>Comparativo de desempenho entre os meses</h3><span class="muted">Margem de lucro mensal e indicadores</span></header>
         <div class="chart h-200"><canvas id="ch-margin" role="img" aria-label="Margem de lucro por mês"></canvas></div>
+        <details class="tbl-toggle" ${matchMedia('(min-width: 721px)').matches ? 'open' : ''}>
+        <summary>Ver tabela comparativa</summary>
         <div class="table-wrap">
           <table class="table compact">
             <thead><tr><th>Mês</th><th class="num">Faturamento</th><th class="num">Despesas</th><th class="num">Lucro</th><th class="num">Margem</th><th class="num">Serviços</th><th class="num">Ticket médio</th><th class="num">Var. fat.</th></tr></thead>
@@ -152,6 +154,7 @@ async function load(el) {
             </tbody>
           </table>
         </div>
+        </details>
       </article>
     </section>`;
 

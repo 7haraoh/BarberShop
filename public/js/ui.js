@@ -264,3 +264,49 @@ export function periodPicker(container, state, onChange, { types = PERIOD_TYPES.
 export function emptyState(text, action = '') {
   return `<div class="empty">${icon('receipt', 'empty-ico')}<p>${esc(text)}</p>${action}</div>`;
 }
+
+// ---------- lista compacta agrupada por dia (celular) ----------
+/**
+ * items: [{ id, date, title, sub, amount_cents, sign: 1|-1, cls }]
+ * Toque no item dispara data-open="<id>".
+ */
+export function dayList(items, { signed = false, today = todayISO() } = {}) {
+  if (!items.length) return '';
+  const groups = new Map();
+  for (const it of items) {
+    if (!groups.has(it.date)) groups.set(it.date, []);
+    groups.get(it.date).push(it);
+  }
+  const yesterday = (() => {
+    const [y, m, d] = today.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d - 1)).toISOString().slice(0, 10);
+  })();
+  const dayName = (d) => (d === today ? 'Hoje' : d === yesterday ? 'Ontem' : fmtDate(d));
+  const fmt = (c, sign) => `${signed ? (sign < 0 ? '−' : '+') : ''}${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(c / 100)}`;
+  let out = '<div class="day-list">';
+  for (const [date, list] of groups) {
+    const total = list.reduce((a, it) => a + it.amount_cents * (it.sign || 1), 0);
+    out += `<div class="day-head"><span>${esc(dayName(date))}</span><b>${fmt(Math.abs(total), total < 0 ? -1 : 1)}</b></div>`;
+    for (const it of list) {
+      out += `<button type="button" class="day-item" data-open="${it.id}">
+        <span class="di-main"><span class="di-title">${it.title}</span>${it.sub ? `<span class="di-sub">${it.sub}</span>` : ''}</span>
+        <span class="di-amt ${it.cls || ''}">${fmt(it.amount_cents, it.sign || 1)}</span>
+      </button>`;
+    }
+  }
+  return out + '</div>';
+}
+
+/** Botão "Mostrar mais" para listas longas. */
+export function moreButton(shown, total) {
+  return shown < total ? `<div class="more-wrap"><button type="button" class="btn btn-ghost btn-sm" data-more>Mostrar mais (${total - shown} restantes)</button></div>` : '';
+}
+
+/** No celular os filtros ficam recolhidos atrás de um botão. */
+export function bindFilterToggle(root, activeCount) {
+  const btn = root.querySelector('[data-filter-toggle]');
+  const box = root.querySelector('.filters');
+  if (!btn || !box) return;
+  btn.querySelector('[data-count]').textContent = activeCount ? ` (${activeCount})` : '';
+  btn.onclick = () => box.classList.toggle('show');
+}
