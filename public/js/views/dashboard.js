@@ -1,8 +1,8 @@
-import { api } from '../api.js';
+import { api, DEMO } from '../api.js';
 import { icon } from '../icons.js';
 import { barsRevExpProfit, lineMoney, doughnut, barsSingle } from '../charts.js';
 import { money, pct, int, todayISO, addMonthsYM, monthStart, monthEnd, monthLabel, monthShort, cap, esc } from '../utils.js';
-import { labelOf, EXPENSE_CATEGORIES } from '/shared/constants.js';
+import { labelOf, EXPENSE_CATEGORIES } from '../../shared/constants.js';
 
 const state = { ym: null };
 
@@ -24,7 +24,8 @@ function delta(v, { invert = false, suffix = 'vs mês anterior' } = {}) {
 }
 
 export async function render(el) {
-  if (!state.ym) state.ym = todayISO().slice(0, 7);
+  // Na demonstração abre no último mês fechado (o mês corrente ainda está incompleto).
+  if (!state.ym) state.ym = DEMO ? addMonthsYM(todayISO().slice(0, 7), -1) : todayISO().slice(0, 7);
   el.innerHTML = `
     <div class="page-head">
       <div>

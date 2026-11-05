@@ -1,4 +1,4 @@
-import { api, dataChanged } from '../api.js';
+import { api, dataChanged, DEMO, resetDemoData } from '../api.js';
 import { icon } from '../icons.js';
 import { toast, confirmDialog, moneyField, readMoney, bindMoneyFields } from '../ui.js';
 import { getSettings, saveSettings } from '../settings.js';
@@ -21,19 +21,38 @@ export async function render(el) {
           <div><button class="btn btn-gold" type="submit">Salvar</button></div>
         </form>
       </article>
-      <article class="card">
+      ${
+        DEMO
+          ? `<article class="card">
+        <header class="card-head"><h3>Dados de demonstração</h3></header>
+        <div class="pad stack">
+          <p class="muted">Esta é uma versão de demonstração com dados fictícios, salvos apenas neste navegador. Na versão contratada, os dados ficam em um banco de dados seguro com backup.</p>
+          <div><button class="btn btn-ghost" data-reset>${icon('upload')} Restaurar dados de demonstração</button></div>
+        </div>
+      </article>`
+          : `<article class="card">
         <header class="card-head"><h3>Backup dos dados</h3></header>
         <div class="pad stack">
           <p class="muted">Todos os dados ficam salvos permanentemente no banco de dados SQLite do servidor. Faça cópias de segurança periódicas.</p>
           <div class="btn-group">
-            <a class="btn btn-ghost" href="/api/backup" download="backup-barbearia-${todayISO()}.json">${icon('download')} Baixar backup</a>
+            <a class="btn btn-ghost" href="api/backup" download="backup-barbearia-${todayISO()}.json">${icon('download')} Baixar backup</a>
             <label class="btn btn-ghost">${icon('upload')} Restaurar backup<input type="file" accept="application/json,.json" data-restore hidden></label>
           </div>
           <p class="muted small">A restauração substitui <b>todos</b> os dados atuais pelos dados do arquivo.</p>
         </div>
-      </article>
+      </article>`
+      }
     </section>`;
   bindMoneyFields(el);
+  el.querySelector('[data-reset]')?.addEventListener('click', async () => {
+    const ok = await confirmDialog({ title: 'Restaurar demonstração', message: 'Apagar suas alterações e voltar aos dados fictícios originais?', confirmLabel: 'Restaurar' });
+    if (!ok) return;
+    await resetDemoData();
+    invalidateServices();
+    await getSettings(true);
+    toast('Dados de demonstração restaurados.');
+    dataChanged('settings');
+  });
   el.querySelector('[data-settings]').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
@@ -45,7 +64,7 @@ export async function render(el) {
       toast(ex.message, 'error');
     }
   });
-  el.querySelector('[data-restore]').addEventListener('change', async (e) => {
+  el.querySelector('[data-restore]')?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;

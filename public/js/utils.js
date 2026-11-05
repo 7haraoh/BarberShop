@@ -1,4 +1,4 @@
-import { TIMEZONE } from '/shared/constants.js';
+import { TIMEZONE } from '../shared/constants.js';
 
 // ---------- moeda (R$) — valores internos em centavos ----------
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });

@@ -3,7 +3,7 @@ import { icon } from '../icons.js';
 import { periodPicker, toast, emptyState } from '../ui.js';
 import { exportPDF, exportXLSX } from '../export.js';
 import { money, fmtDate, todayISO, esc, weekday, cap } from '../utils.js';
-import { PAYMENT_METHODS, labelOf } from '/shared/constants.js';
+import { PAYMENT_METHODS, labelOf } from '../../shared/constants.js';
 import { getSettings } from '../settings.js';
 
 export const title = 'Controle de caixa';

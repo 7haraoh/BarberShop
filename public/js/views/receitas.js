@@ -3,7 +3,7 @@ import { icon } from '../icons.js';
 import { periodPicker, confirmDialog, toast, emptyState } from '../ui.js';
 import { revenueForm, quickRevenue, getServices, lastPayment, paymentChips } from '../forms.js';
 import { money, int, fmtDate, todayISO, esc, debounce, pct } from '../utils.js';
-import { PAYMENT_METHODS, labelOf } from '/shared/constants.js';
+import { PAYMENT_METHODS, labelOf } from '../../shared/constants.js';
 
 export const title = 'Receitas';
 const state = { period: { type: 'month', anchor: null }, filters: { service: '', payment_method: '', q: '' }, range: null };

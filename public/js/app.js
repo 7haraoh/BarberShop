@@ -1,4 +1,4 @@
-import { bus } from './api.js';
+import { bus, DEMO } from './api.js';
 import { icon } from './icons.js';
 import { destroyAll } from './charts.js';
 import { toast } from './ui.js';
@@ -78,6 +78,12 @@ async function updateBrand() {
 
 function init() {
   buildNav();
+  if (DEMO) {
+    const b = document.createElement('div');
+    b.className = 'demo-banner';
+    b.innerHTML = '<b>Versão de demonstração</b> · dados fictícios — fique à vontade para lançar, editar e excluir. <a href="#/config">Restaurar dados</a>';
+    $('.topbar').after(b);
+  }
   $('#today').textContent = `${cap(weekday(todayISO()))}, ${fmtDate(todayISO())}`;
   $('#btn-rev').addEventListener('click', () => revenueForm());
   $('#btn-exp').addEventListener('click', () => expenseForm());

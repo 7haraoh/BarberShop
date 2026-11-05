@@ -1,17 +1,17 @@
-import { api } from '../api.js';
+import { api, DEMO } from '../api.js';
 import { icon } from '../icons.js';
 import { periodPicker, toast } from '../ui.js';
 import { linesMulti, doughnut } from '../charts.js';
 import { exportPDF, exportXLSX } from '../export.js';
-import { money, pct, int, fmtDate, todayISO, esc, daysBetween, monthShort, cap } from '../utils.js';
-import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES, labelOf } from '/shared/constants.js';
+import { money, pct, int, fmtDate, todayISO, esc, daysBetween, monthShort, cap, addMonthsYM } from '../utils.js';
+import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES, labelOf } from '../../shared/constants.js';
 import { getSettings } from '../settings.js';
 
 export const title = 'Relatórios';
 const state = { period: { type: 'month', anchor: null }, range: null, data: null };
 
 export async function render(el) {
-  if (!state.period.anchor) state.period.anchor = todayISO();
+  if (!state.period.anchor) state.period.anchor = DEMO ? `${addMonthsYM(todayISO().slice(0, 7), -1)}-01` : todayISO();
   el.innerHTML = `
     <div class="page-head">
       <div><h1>Relatórios financeiros</h1><p class="muted">Análise completa por período</p></div>

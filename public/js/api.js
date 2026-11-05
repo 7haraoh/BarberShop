@@ -1,6 +1,14 @@
 // Cliente HTTP da API + barramento de eventos para atualizar telas após lançamentos.
+// Em modo demonstração (window.DEMO_MODE) a API roda no próprio navegador.
+export const DEMO = !!window.DEMO_MODE;
+let demo = null;
+
 async function request(method, url, body) {
-  const res = await fetch('/api' + url, {
+  if (DEMO) {
+    demo = demo || (await import('./demo-api.js'));
+    return demo.demoRequest(method, url, body);
+  }
+  const res = await fetch('api' + url, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : {},
     body: body ? JSON.stringify(body) : undefined,
@@ -26,6 +34,11 @@ export const api = {
   put: (url, body) => request('PUT', url, body),
   del: (url) => request('DELETE', url),
 };
+
+export async function resetDemoData() {
+  demo = demo || (await import('./demo-api.js'));
+  demo.resetDemo();
+}
 
 // Notifica as telas que os dados mudaram (gráficos e indicadores se atualizam sozinhos).
 export const bus = new EventTarget();

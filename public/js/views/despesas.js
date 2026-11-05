@@ -3,7 +3,7 @@ import { icon } from '../icons.js';
 import { periodPicker, confirmDialog, toast, emptyState } from '../ui.js';
 import { expenseForm } from '../forms.js';
 import { money, fmtDate, todayISO, esc, debounce, pct } from '../utils.js';
-import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES, labelOf } from '/shared/constants.js';
+import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES, labelOf } from '../../shared/constants.js';
 
 export const title = 'Despesas';
 const state = { period: { type: 'month', anchor: null }, filters: { category: '', type: '', payment_method: '', q: '' }, range: null };

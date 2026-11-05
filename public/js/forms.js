@@ -1,7 +1,7 @@
 import { api, dataChanged } from './api.js';
 import { openModal, closeModal, toast, dateField, readDate, moneyField, readMoney } from './ui.js';
 import { esc, todayISO, money, centsToInput, parseMoney, $ } from './utils.js';
-import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES } from '/shared/constants.js';
+import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES } from '../shared/constants.js';
 
 // Cache simples de serviços (recarregado sempre que algo muda).
 let servicesCache = null;
