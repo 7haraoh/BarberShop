@@ -3,7 +3,7 @@
 import { DEFAULT_SERVICES, PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES } from '../shared/constants.js';
 import { todayISO } from './utils.js';
 
-const KEY = 'bb-demo-v1';
+const KEY = 'bb-demo-v2';
 let db = null;
 
 // ---------- persistência ----------
@@ -82,21 +82,24 @@ function generate() {
       }
     }
     const day = d.slice(8, 10);
+    const weekIdx = Math.floor(k / 7);
     if (day === '05') {
       exp(d, `Aluguel ${d.slice(5, 7)}/${d.slice(0, 4)}`, 'aluguel', 280000, 'fixa', 'pix');
       exp(d, 'Comissões dos barbeiros', 'salarios', between(240000, 330000), 'fixa', 'pix');
     }
-    if (day === '10') {
-      exp(d, 'Conta de água', 'agua', between(9000, 16000), 'fixa', 'debito');
-      exp(d, 'Conta de energia', 'energia', between(28000, 42000), 'fixa', 'debito');
-      exp(d, 'Internet fibra', 'internet', 12990, 'fixa', 'debito');
-    }
+    if (day === '08') exp(d, 'Internet', 'internet', 12990, 'fixa', 'debito');
+    if (day === '10') exp(d, 'Conta de água', 'agua', between(9000, 16000), 'fixa', 'debito');
+    if (day === '15') exp(d, 'Conta de luz', 'energia', between(28000, 42000), 'fixa', 'debito');
     if (day === '20') exp(d, 'DAS Simples Nacional', 'impostos', between(35000, 60000), 'fixa', 'pix');
-    if (day === '12' || day === '26') {
-      exp(d, 'Pomadas, shampoo e finalizadores', 'produtos_cabelo', between(18000, 42000), 'variavel', 'credito');
-      exp(d, 'Óleos e balms para barba', 'produtos_barba', between(8000, 20000), 'variavel', 'credito');
-      exp(d, 'Lâminas, toalhas e capas descartáveis', 'descartaveis', between(6000, 14000), 'variavel', 'dinheiro');
+    // Insumos semanais (segunda-feira)
+    if (dow === 1) {
+      exp(d, 'Navalhas / lâminas descartáveis', 'descartaveis', between(3500, 6500), 'variavel', 'dinheiro');
+      exp(d, 'Papel pescoço e toalhas de papel', 'descartaveis', between(2500, 4800), 'variavel', 'dinheiro');
+      if (weekIdx % 2 === 0) exp(d, 'Álcool 70%', 'descartaveis', between(1800, 3200), 'variavel', 'pix');
+      if (weekIdx % 2 === 1) exp(d, 'Creme de barbear', 'produtos_barba', between(4000, 8000), 'variavel', 'credito');
+      if (weekIdx % 2 === 1) exp(d, 'Pomadas modeladoras', 'produtos_cabelo', between(6000, 14000), 'variavel', 'credito');
     }
+    if (day === '12') exp(d, 'Shampoo e condicionador', 'produtos_cabelo', between(5000, 9000), 'variavel', 'credito');
     if (day === '15' && rnd() < 0.5) exp(d, 'Impulsionamento Instagram', 'marketing', between(10000, 30000), 'variavel', 'credito');
     if (day === '18' && rnd() < 0.25) exp(d, 'Manutenção de máquinas', 'equipamentos', between(15000, 60000), 'variavel', 'pix');
   }

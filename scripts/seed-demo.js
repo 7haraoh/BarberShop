@@ -36,7 +36,7 @@ tx(db, () => {
   );
   const start = addDays(today, -365);
   let nR = 0;
-  let nE = 0;
+  
   for (let d = start; d <= today; d = addDays(d, 1)) {
     const dow = new Date(d + 'T12:00:00Z').getUTCDay();
     const open = dow !== 0; // fechado aos domingos
@@ -52,37 +52,28 @@ tx(db, () => {
       nR++;
     }
     const day = d.slice(8, 10);
-    const ym = d.slice(0, 7);
+    const daysFromStart = Math.round((new Date(d) - new Date(start)) / 864e5);
+    const weekIdx = Math.floor(daysFromStart / 7);
     if (day === '05') {
-      insE.run(d, `Aluguel ${ym}`, 'aluguel', 280000, 'fixa', 'pix', '');
+      insE.run(d, `Aluguel ${d.slice(5, 7)}/${d.slice(0, 4)}`, 'aluguel', 280000, 'fixa', 'pix', '');
       insE.run(d, 'Comissões dos barbeiros', 'salarios', between(240000, 330000), 'fixa', 'pix', '');
-      nE += 2;
     }
-    if (day === '10') {
-      insE.run(d, 'Conta de água', 'agua', between(9000, 16000), 'fixa', 'debito', '');
-      insE.run(d, 'Conta de energia', 'energia', between(28000, 42000), 'fixa', 'debito', '');
-      insE.run(d, 'Internet fibra', 'internet', 12990, 'fixa', 'debito', '');
-      nE += 3;
+    if (day === '08') insE.run(d, 'Internet', 'internet', 12990, 'fixa', 'debito', '');
+    if (day === '10') insE.run(d, 'Conta de água', 'agua', between(9000, 16000), 'fixa', 'debito', '');
+    if (day === '15') insE.run(d, 'Conta de luz', 'energia', between(28000, 42000), 'fixa', 'debito', '');
+    if (day === '20') insE.run(d, 'DAS Simples Nacional', 'impostos', between(35000, 60000), 'fixa', 'pix', '');
+    // Insumos semanais (segunda-feira)
+    if (dow === 1) {
+      insE.run(d, 'Navalhas / lâminas descartáveis', 'descartaveis', between(3500, 6500), 'variavel', 'dinheiro', '');
+      insE.run(d, 'Papel pescoço e toalhas de papel', 'descartaveis', between(2500, 4800), 'variavel', 'dinheiro', '');
+      if (weekIdx % 2 === 0) insE.run(d, 'Álcool 70%', 'descartaveis', between(1800, 3200), 'variavel', 'pix', '');
+      if (weekIdx % 2 === 1) insE.run(d, 'Creme de barbear', 'produtos_barba', between(4000, 8000), 'variavel', 'credito', '');
+      if (weekIdx % 2 === 1) insE.run(d, 'Pomadas modeladoras', 'produtos_cabelo', between(6000, 14000), 'variavel', 'credito', '');
     }
-    if (day === '20') {
-      insE.run(d, 'DAS Simples Nacional', 'impostos', between(35000, 60000), 'fixa', 'pix', '');
-      nE++;
-    }
-    if (day === '12' || day === '26') {
-      insE.run(d, 'Pomadas, shampoo e finalizadores', 'produtos_cabelo', between(18000, 42000), 'variavel', 'credito', '');
-      insE.run(d, 'Óleos e balms para barba', 'produtos_barba', between(8000, 20000), 'variavel', 'credito', '');
-      insE.run(d, 'Lâminas, toalhas e capas descartáveis', 'descartaveis', between(6000, 14000), 'variavel', 'dinheiro', '');
-      nE += 3;
-    }
-    if (day === '15' && rnd() < 0.5) {
-      insE.run(d, 'Impulsionamento Instagram', 'marketing', between(10000, 30000), 'variavel', 'credito', '');
-      nE++;
-    }
-    if (day === '18' && rnd() < 0.25) {
-      insE.run(d, 'Manutenção de máquinas', 'equipamentos', between(15000, 60000), 'variavel', 'pix', '');
-      nE++;
-    }
+    if (day === '12') insE.run(d, 'Shampoo e condicionador', 'produtos_cabelo', between(5000, 9000), 'variavel', 'credito', '');
+    if (day === '15' && rnd() < 0.5) insE.run(d, 'Impulsionamento Instagram', 'marketing', between(10000, 30000), 'variavel', 'credito', '');
+    if (day === '18' && rnd() < 0.25) insE.run(d, 'Manutenção de máquinas', 'equipamentos', between(15000, 60000), 'variavel', 'pix', '');
   }
-  console.log(`Dados de demonstração inseridos: ${nR} receitas, ${nE} despesas.`);
+  console.log(`Dados de demonstração inseridos: ${nR} receitas, ${db.prepare('SELECT COUNT(*) n FROM expenses').get().n} despesas.`);
 });
 db.close();

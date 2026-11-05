@@ -1,6 +1,7 @@
 import { api, dataChanged } from './api.js';
-import { openModal, closeModal, toast, dateField, readDate, moneyField, readMoney } from './ui.js';
-import { esc, todayISO, money, centsToInput, parseMoney, $ } from './utils.js';
+import { openModal, closeModal, toast, dateField, readDate, moneyField, readMoney, confirmDialog } from './ui.js';
+import { esc, todayISO, money, centsToInput, parseMoney, fmtDate, $ } from './utils.js';
+import { icon } from './icons.js';
 import { PAYMENT_METHODS, EXPENSE_CATEGORIES, EXPENSE_TYPES } from '../shared/constants.js';
 
 // Cache simples de serviços (recarregado sempre que algo muda).
@@ -59,6 +60,7 @@ export async function revenueForm(existing = null, preset = {}) {
   openModal({
     title: existing ? 'Editar receita' : 'Nova receita',
     submitLabel: existing ? 'Salvar alterações' : 'Lançar receita',
+    footer: existing ? editFooter('Salvar') : undefined,
     body: `
       <div class="grid-2">
         <label class="field"><span>Data do recebimento</span>${dateField('date', r.date)}</label>
@@ -82,6 +84,8 @@ export async function revenueForm(existing = null, preset = {}) {
       </label>
       <div class="total-line"><span>Total do lançamento</span><strong data-total>—</strong></div>`,
     onOpen(form) {
+      if (existing)
+        bindDelete(form, `Excluir "${existing.service_name}" de ${money(existing.total_cents)} em ${fmtDate(existing.date)}?`, `/revenues/${existing.id}`, 'revenues', 'Receita excluída.');
       const upd = () => {
         const q = Math.max(1, parseInt(form.elements.quantity.value, 10) || 0);
         const u = parseMoney(form.elements.unit.value);
@@ -139,7 +143,40 @@ export async function quickRevenue(service, paymentMethod, date = todayISO()) {
   rememberPayment(paymentMethod);
   dataChanged('revenues');
 }
-export { lastPayment };
+export { lastPayment, rememberPayment };
+
+// Rodapé de edição com botão Excluir (evita ícones em cada item da lista).
+const editFooter = (submitLabel) => `
+  <button type="button" class="btn btn-danger-ghost" data-delete>${icon('trash')} Excluir</button>
+  <span class="spacer"></span>
+  <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+  <button type="submit" class="btn btn-gold">${esc(submitLabel)}</button>`;
+function bindDelete(form, message, url, what, done) {
+  form.querySelector('[data-delete]').addEventListener('click', async () => {
+    if (!(await confirmDialog({ title: 'Confirmar exclusão', message: `${message} Esta ação não pode ser desfeita.` }))) return;
+    try {
+      await api.del(url);
+      toast(done);
+      dataChanged(what);
+    } catch (e) {
+      toast(e.message, 'error');
+    }
+  });
+}
+
+// Atalhos de despesas comuns (preenchem descrição, categoria e tipo).
+const EXPENSE_PRESETS = [
+  ['Água', 'Conta de água', 'agua', 'fixa'],
+  ['Luz', 'Conta de luz', 'energia', 'fixa'],
+  ['Internet', 'Internet', 'internet', 'fixa'],
+  ['Aluguel', 'Aluguel', 'aluguel', 'fixa'],
+  ['Navalhas', 'Navalhas / lâminas descartáveis', 'descartaveis', 'variavel'],
+  ['Álcool', 'Álcool 70%', 'descartaveis', 'variavel'],
+  ['Papel', 'Papel pescoço e toalhas de papel', 'descartaveis', 'variavel'],
+  ['Cremes', 'Creme de barbear', 'produtos_barba', 'variavel'],
+  ['Pomadas', 'Pomadas modeladoras', 'produtos_cabelo', 'variavel'],
+  ['Comissões', 'Comissões dos barbeiros', 'salarios', 'fixa'],
+];
 
 /** Formulário de despesa (novo ou edição). */
 export function expenseForm(existing = null) {
@@ -156,9 +193,17 @@ export function expenseForm(existing = null) {
   openModal({
     title: existing ? 'Editar despesa' : 'Nova despesa',
     submitLabel: existing ? 'Salvar alterações' : 'Lançar despesa',
+    footer: existing ? editFooter('Salvar') : undefined,
     body: `
+      ${
+        existing
+          ? ''
+          : `<div class="field"><span>Atalhos</span><div class="chips presets">
+              ${EXPENSE_PRESETS.map((p, i) => `<button type="button" class="chip-btn" data-preset="${i}">${p[0]}</button>`).join('')}
+            </div></div>`
+      }
       <label class="field"><span>Descrição</span>
-        <input type="text" name="description" maxlength="120" required value="${esc(e.description)}" placeholder="Ex.: Aluguel de novembro" autofocus>
+        <input type="text" name="description" maxlength="120" required value="${esc(e.description)}" placeholder="Ex.: Aluguel de novembro">
       </label>
       <div class="grid-2">
         <label class="field"><span>Categoria</span><select name="category" required>${options(EXPENSE_CATEGORIES, e.category)}</select></label>
@@ -175,6 +220,18 @@ export function expenseForm(existing = null) {
         <textarea name="notes" rows="2" maxlength="1000">${esc(e.notes)}</textarea>
       </label>`,
     onOpen(form) {
+      if (existing)
+        bindDelete(form, `Excluir a despesa "${existing.description}" de ${money(existing.amount_cents)} em ${fmtDate(existing.date)}?`, `/expenses/${existing.id}`, 'expenses', 'Despesa excluída.');
+      form.querySelectorAll('[data-preset]').forEach((b) =>
+        b.addEventListener('click', () => {
+          const [, desc, cat, type] = EXPENSE_PRESETS[Number(b.dataset.preset)];
+          form.elements.description.value = desc;
+          form.elements.category.value = cat;
+          form.querySelector(`input[name=type][value=${type}]`).checked = true;
+          form.querySelectorAll('[data-preset]').forEach((x) => x.classList.toggle('on', x === b));
+          form.elements.amount.focus();
+        })
+      );
       if (!existing) {
         // Sugere o tipo conforme a categoria (pode ser alterado).
         form.elements.category.addEventListener('change', () => {
