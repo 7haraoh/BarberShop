@@ -2,3 +2,9 @@ node_modules
 data/*.db*
 .git
 test
+index.html
+css
+js
+vendor
+favicon.svg
+manifest.webmanifest

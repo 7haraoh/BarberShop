@@ -25,10 +25,13 @@ Testes da API: `npm test`.
 
 ## Versão de demonstração (GitHub Pages)
 
-A pasta `docs/` contém uma versão **estática** do app para apresentar a clientes: roda inteira no navegador, sem servidor, com 12 meses de dados fictícios (salvos só no navegador de quem abre, com botão para restaurar). Dashboard e relatórios abrem no último mês fechado.
+**Demo online:** https://7haraoh.github.io/BarberShop/
 
-- Para publicar: no GitHub, **Settings → Pages → Build and deployment → Deploy from a branch**, escolha o branch e a pasta **`/docs`** e salve. Em ~1 minuto o link fica disponível (`https://<usuario>.github.io/<repositorio>/`).
-- Depois de alterar o app, regenere a demo com `npm run build:demo` e faça commit da pasta `docs/`.
+A **raiz do repositório** contém uma versão **estática** do app para apresentar a clientes: roda inteira no navegador, sem servidor, com 12 meses de dados fictícios (salvos só no navegador de quem abre, com botão para restaurar). Dashboard e relatórios abrem no último mês fechado.
+
+- Publicação: **Settings → Pages → Deploy from a branch → `main` / `(root)`**.
+- Arquivos da demo na raiz (gerados, não edite à mão): `index.html`, `favicon.svg`, `manifest.webmanifest`, `css/`, `js/`, `vendor/`. A pasta `shared/` é usada pelo servidor e pela demo.
+- Depois de alterar o app em `public/`, regenere a demo com `npm run build:demo` e faça commit dos arquivos gerados.
 
 ## Publicação (deploy)
 
